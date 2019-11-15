@@ -2,30 +2,9 @@ import React, { Component } from 'react'
 import { Button, Modal,Icon,Grid,Segment } from 'semantic-ui-react'
 
 class AddSessionGuests extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      selected:[]
-    };
-  }
-
-  onSelect = (id) => {
-    const { selected } = this.state;
-    const remove = selected.includes(id);
-    let list = remove ? selected.filter(i => i !== id) : [...selected, id];
-    list = [...new Set(list)];
-    this.setState({ selected: list});
-  }
-
-  addGuests = () => {
-    console.log(this.state.selected);
-  }
-
 
   render() {
-    const { guests,sessionNo } = this.props.event
-    console.log(this.props)
+    const { sessions,sessionNo } = this.props.event
     return (
       <div>
         <Modal size={'tiny'} open={this.props.event.open}>
@@ -36,11 +15,11 @@ class AddSessionGuests extends Component {
           <Modal.Content>
             <Grid columns='3'>
                 {
-                  guests ? guests.map((guest) => (
-                    <Grid.Column key={guest.id}>
-                      <Segment onClick={(e) => this.onSelect(guest.id)}>
-                        {guest.firstName} {guest.lastName}
-                        <Icon className={this.state.selected.includes(guest.id) ? 'circle check': ''}  style={{float:"right"}} color={'grey'}/>
+                  sessions ?sessions.event_guests.map((data) => (
+                    <Grid.Column key={data.guest.id}>
+                      <Segment onClick={(e) => this.props.onSelect(data.guest.id)}>
+                        {data.guest.firstName} {data.guest.lastName}
+                        <Icon className={this.props.selected.includes(data.guest.id) ? 'circle check': ''}  style={{float:"right"}} color={'grey'}/>
                       </Segment>
                     </Grid.Column>
                   )):''
@@ -48,7 +27,7 @@ class AddSessionGuests extends Component {
             </Grid>
           </Modal.Content>
           <Modal.Actions>
-            <Button content='Add' fluid onClick={() => this.addGuests()}/>
+            <Button content='Add' fluid onClick={() => this.props.addGuests(this.props.currentSession,this.props.selected)}/>
           </Modal.Actions>
         </Modal>
       </div>

@@ -9,11 +9,8 @@ import { withStyles } from '@material-ui/core/styles';
 import injectReducer from 'utils/injectReducer';
 import { createStructuredSelector } from 'reselect';
 import makeSelectCalendar from './selectors';
-import ChevronLeftRounded from "@material-ui/icons/ChevronLeftRounded";
-import ChevronRightRounded from "@material-ui/icons/ChevronRightRounded";
 import DisplayDailyCalendar from "../../components/Calendar/index";
 import Box from "@material-ui/core/Box";
-import { Button } from 'semantic-ui-react'
 import { Container, Icon } from 'semantic-ui-react';
 import { compose } from 'redux';
 
@@ -32,7 +29,7 @@ export class Calendar extends Component {
         header:'',
     };
 
-    componentWillMount() {
+    componentDidMount() {
         this.props.setHeader();
         const { eventsLoading,events } = this.props.calendar;
         if (!events && !eventsLoading) {
@@ -40,7 +37,11 @@ export class Calendar extends Component {
         }
       }
 
-    renderHeader = () => {
+      componentWillMount() {
+        this.setState({'header':"Event Manager"})
+      }
+
+  renderHeader = () => {
         const dateYearFormat = "YYYY";
         const dateMonthFormat = "MMMM YYYY";
         let header;
@@ -170,19 +171,26 @@ export class Calendar extends Component {
         );
     };
 
+  // renderHeaderTitle = () => {
+  //   return(
+  //     <CompactSegment basic secondary>
+  //       <CompactHeader>
+  //         <div style={{verticalAlign: "sub",display:"inline-block",paddingRight: "14px"}}>Manage Session :</div>
+  //         <Button size='big' basic color='black' >Monthly</Button>
+  //         <Button size='big' basic color='black' >Weekly</Button>
+  //       </CompactHeader>
+  //       <Button size='massive'>Location</Button>
+  //       <Button size='massive'>Add Event</Button>
+  //     </CompactSegment>
+  //   )
+  // }
+
     render() {
         const { classes } = this.props
         return (
-                <React.Fragment>
-                  <div className={classes.header}>
-                    <span className={classes.title}>Event Manager</span>
-                    <Button basic color='black' content='Monthly' size={'big'}/>
-                    <Button basic color='black' content='Weekly' size={'big'} disabled/>
-                  </div>
                 <Container style={{width:"75%"}} >
                   {this.dates()}
                 </Container>
-                </React.Fragment>
         );
     }
 }
@@ -202,6 +210,7 @@ const styles = theme => ({
     marginRight:"17px"
   }
 });
+
 const mapStateToProps = createStructuredSelector({
   calendar: makeSelectCalendar(),
 });

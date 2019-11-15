@@ -18,6 +18,7 @@ import {
   Grid,
   Image,
   Button,
+  Item
 } from 'semantic-ui-react';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -34,6 +35,9 @@ import logo from 'images/logo.png';
 import GlobalStyle from '../../global-styles';
 import makeSelectUser from '../User/selectors';
 import Session from 'containers/Session/Loadable';
+import makeSelectCalendar from '../Calendar/selectors';
+import makeSelectEvent from '../Session/selectors';
+import hello from '../../components/Calendar'
 
 class App extends React.PureComponent {
   state = {
@@ -43,6 +47,20 @@ class App extends React.PureComponent {
   goHome = () => {
     return this.props.history.push('/');
   }
+
+  // renderHeader = () => {
+  //   return(
+  //     <CompactSegment basic secondary>
+  //       <CompactHeader>
+  //         <div style={{verticalAlign: "sub",display:"inline-block",paddingRight: "14px"}}>Manage Session :</div>
+  //         <Button size='big' basic color='black' >Monthly</Button>
+  //         <Button size='big' basic color='black' >Weekly</Button>
+  //       </CompactHeader>
+  //       <Button size='massive'>Location</Button>
+  //       <Button size='massive'>Add Event</Button>
+  //     </CompactSegment>
+  //   )
+  // }
 
   render() {
     const { user } = this.props;
@@ -107,13 +125,15 @@ class App extends React.PureComponent {
                     </Button>
                   </CompactSegment>
                   <Divider />
-                  {!user.token ?
-                    <CompactSegment basic secondary>
-                    <CompactSectionHeader>
-                    Login
-                    </CompactSectionHeader>
-                    </CompactSegment> :''
-                  }
+                   <CompactSegment basic secondary>
+                    <CompactHeader>
+                    <div style={{verticalAlign: "sub",display:"inline-block",paddingRight: "14px"}}>Manage Session :</div>
+                        <Button size='big' basic color='black' >Monthly</Button>
+                         <Button size='big' basic color='black' >Weekly</Button>
+                     </CompactHeader>
+                     <Button size='massive'>Location</Button>
+                     <Button size='massive'>Add Event</Button>
+                   </CompactSegment>
                 </CompactCol>
               </CompactRow>
             </CompactGrid>
@@ -148,6 +168,14 @@ const CompactHeader = styled.h2`
     margin: 0;
     text-align: left;
     flex: 1;
+  }
+`;
+
+const CompactComponentHeader = styled.h2`
+  &&& {
+    margin: 0;
+    width:180px;
+    align-self: center;
   }
 `;
 
@@ -198,11 +226,12 @@ App.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   user: makeSelectUser(),
+  calendar: makeSelectCalendar(),
+  event: makeSelectEvent(),
 });
 
 const withConnect = connect(
   mapStateToProps,
   null,
 );
-
 export default compose(withConnect,withRouter)(App);

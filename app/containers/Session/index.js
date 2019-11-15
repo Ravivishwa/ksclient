@@ -1,6 +1,6 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom';
-import { Container, Grid, Menu, Segment, Icon, Image, Card, Item, Button } from 'semantic-ui-react';
+import { Container, Grid, Menu, Segment, Icon, Image, Card, Item, Button, Loader } from 'semantic-ui-react';
 import dateFns from "date-fns";
 import { createStructuredSelector } from 'reselect';
 import makeSelectEvent from './selectors';
@@ -20,7 +20,9 @@ class Session extends React.Component{
     this.state = {
       mode: props.match.params.mode || '',
       editId: parseInt(props.match.params.id, 10),
-      open:false
+      open:false,
+      selected:[],
+      currentSession:''
     };
   }
 
@@ -38,47 +40,61 @@ class Session extends React.Component{
     }
   }
 
-  // componentDidMount() {
-  //   const { getSession } = this.props;
-  //   const { editId } = this.state;
-  //   if (editId) {
-  //     getSession(editId);
-  //   }
-  // }
 
-  addGuest = (session,no) =>{
-    this.props.addGuest(session,no)
+  onSelect = (id) => {
+    const { selected } = this.state;
+    const remove = selected.includes(id);
+    let list = remove ? selected.filter(i => i !== id) : [...selected, id];
+    list = [...new Set(list)];
+    this.setState({ selected: list});
+  }
+
+  openGuests = (id,no) =>{
+    const { event } = this.props
+    let list = [];
+    let currentSession = event.sessions ? event.sessions.event_sessions.filter( x => x.id === id) :''
+    currentSession[0].session_guests.map(x => list.push(x.id))
+    this.setState({ selected:list,currentSession:id});
+    this.props.openGuests(id,no)
+  }
+
+  addGuests = (identifier,ids) =>{
+    this.props.addGuests(identifier,ids)
   }
 
   close = () => this.props.close()
 
   render() {
     const src = "https://react.semantic-ui.com/images/wireframe/image.png"
-    const { event,classes } = this.props;
-    const { sessions } = this.props.event;
-    console.log("dd",sessions)
+    const { event,classes, } = this.props;
+    const { sessions,sessionLoading } = this.props.event;
+
+    if(sessionLoading){
+      return (
+        <Loader active size='large'/>
+      )
+    }
+
     return (
-      <React.Fragment>
-        <span className={classes.header}>Manage Session</span>
       <Container style={{width:"90%",paddingTop:"50px"}}>
         <Grid >
           <Grid.Row>
             <Grid.Column width={3}>
               <Menu fluid vertical>
-                <Menu.Item className='header' style={{fontSize: "20px"}}>Guests</Menu.Item>
-                  {event.guests ? event.guests.map((guest) => (
-                    <Menu.Item key={guest.id}>
-                      <Image src='https://react.semantic-ui.com/images/wireframe/square-image.png' size='mini' verticalAlign='middle' circular />
-                      &nbsp;&nbsp;{guest.firstName} {guest.lastName}
-                    </Menu.Item>
-                  )) : null}
+                <Menu.Item className='header' style={{fontSize: "20px",backgroundColor: "#f3f4f5"}}>{sessions ? sessions.event_guests.length ? `Guests` :'No Guests Add On this Event' :''} </Menu.Item>
+                    {sessions ? sessions.event_guests.map((data) => (
+                      <Menu.Item key={data.guest.id} >
+                        <Image src='https://react.semantic-ui.com/images/wireframe/square-image.png' size='mini' verticalAlign='middle' circular />
+                        &nbsp;&nbsp;{data.guest.firstName} {data.guest.lastName}
+                      </Menu.Item>
+                    )) : null}
               </Menu>
             </Grid.Column>
             <Grid.Column width={13}>
               {
-                sessions ? Object.values(sessions).map((session,i) => (
-                  <Menu fluid vertical key={i}>
-                    <Menu.Item >Session  {i+1} - {dateFns.format(session.session_time, 'h A')}
+                sessions ? sessions.event_sessions ? sessions.event_sessions.map((session,i) => (
+                  <Menu fluid vertical key={session.id}>
+                    <Menu.Item style={{backgroundColor: "#f3f4f5"}}>Session  {i+1} - {dateFns.format(session.time, 'h A')}
                       <Icon name='remove' color={'grey'}/>
                       <Icon name='chat' color={'grey'}/>
                       <Icon name='copy' color={'grey'}/>
@@ -87,18 +103,18 @@ class Session extends React.Component{
                     <Menu.Item >
                       <Grid columns={8}>
                         {
-                          session ? session.guests.map(data => (
+                          session ? session.session_guests.map(data => (
                             <div style={{paddingTop:"1rem",paddingBottom:"3rem"}} key={data.id}>
                               <div className={classes.image}>
                                 <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ4G_u9xXKwuxdDzCLYzOgAyTsxdqQV6IvaeWE21YWEI87a46MT' style={{width:"56px",height:"100%"}} className={classes.imageCenter}/>
                                 <div className={classes.textCenter}>
-                                  {data.firstName} {data.lastName}
+                                  {data.first_name} {data.last_name}
                                 </div>
                               </div>
                             </div>
                           )):''
                         }
-                        <Grid.Column onClick={() => this.addGuest(session,i+1)}>
+                        <Grid.Column onClick={() => this.openGuests(session.id,i+1)}>
                           <div className={classes.image}>
                             <div style={{width:"56px",height:"100%",backgroundColor: "darkgrey",position:"relative"}} className={classes.center}>
                                 <Icon name='add' size={'big'} style={{color:"darkgrey",borderRadius:"50%",height:"34px",backgroundColor:"#FFF"}} className={classes.imageCenter}/>
@@ -108,18 +124,20 @@ class Session extends React.Component{
                     </Grid>
                     </Menu.Item>
                   </Menu>
-                )) : ''
+                )) : 'No Sessions !':' '
               }
               <Button content='Add Session' fluid onClick={this.props.addEvent}/>
             </Grid.Column>
             <AddSessionGuests
-              close={this.close}
               {...this.props}
+              close={this.close}
+              onSelect = {this.onSelect}
+              selected = {this.state.selected}
+              currentSession = {this.state.currentSession}
             />
           </Grid.Row>
         </Grid>
       </Container>
-      </React.Fragment>
     )
   }
 }
@@ -169,7 +187,8 @@ function mapDispatchToProps(dispatch) {
   return {
     getGuests: () => dispatch(actions.getGuests()),
     getSession: id => dispatch(actions.getSession(id)),
-    addGuest: (session,no) => dispatch(actions.addGuest(session,no)),
+    openGuests: (id,no) => dispatch(actions.openGuests(id,no)),
+    addGuests: (identifier,ids) => dispatch(actions.addGuests(identifier,ids)),
     close: () => dispatch(actions.close()),
     setHeader: () => dispatch(actions.setHeader()),
   };

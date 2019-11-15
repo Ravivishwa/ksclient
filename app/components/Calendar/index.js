@@ -10,6 +10,7 @@ import AddEvent from '../AddEvent/index';
 const DisplayDailyCalendar = props => {
   const { selectedDate,classes } = props;
   const { events } = props.calendar;
+
   const monthStart = dateFns.startOfMonth(selectedDate);
   const monthEnd = dateFns.endOfMonth(monthStart);
   const startDate = dateFns.startOfWeek(monthStart);
@@ -41,49 +42,35 @@ const DisplayDailyCalendar = props => {
 
   while (day <= end) {
     for (let i = 0; i < 7; i++) {
-      let sessionIds =[]
-      let guestIds =[]
       formattedDate = dateFns.format(day, dateFormat);
       currentMonth  = dateFns.format(day, 'MMM');
       sameMonth = dateFns.isSameMonth(day, selectedDate)
       const cloneDay = day;
-      let event = events? events.filter(x => x.event.date.split("T")[0] === dateFns.format(day, 'YYYY-DD-MM')):'';
-      console.log(event)
-      if(event.length)
-      {
-        Object.keys(event).forEach(function(key) {
-         events[key].event.id
-          sessionIds.push(events[key].sessions.id);
-          guestIds.push(events[key].guest.id);
-        });
-      }
-      let sessionCount = [... new Set(sessionIds)].length
-      let guestCount = [... new Set(guestIds)].length
-      let eventId = event.length ? event[0].event.id : '';
+      let event = events? events.filter(x => x.event_date.split("T")[0] === dateFns.format(day, 'YYYY-DD-MM')):'';
+      let sessionCount = event.length ? event[0].session_count:'';
+      let guestCount  = event.length ? event[0].guest_count:'';
+      let eventId = event.length ? event[0].id : '';
 
       if(sameMonth){
         daysOfWeek.push(
-          <Table.Cell key={formattedDate}>
+          <Table.Cell key={formattedDate} style ={{padding: "32px"}}>
             <Grid textAlign='center' columns={1} onClick={() => props.onDateClick(dateFns.parse(cloneDay),eventId)}
-            style={{padding:'11px'}}>
+            >
               <Grid.Row >
                 <Grid.Column >
-                  <Menu fluid vertical className={classes.dateContent} borderless>
-                    <Menu.Item className='header' disabled={!eventId}>{currentMonth} {formattedDate}</Menu.Item>
-                  </Menu>
-                </Grid.Column>
-                <Grid.Column >
-                  <Menu fluid vertical className={classes.dayCell} borderless>
-                    <Menu.Item>
+                  <Menu fluid vertical borderless className={classes.dateContent} >
+                    <Menu.Item className='header'  disabled={!eventId}>{currentMonth} {formattedDate}</Menu.Item>
+                    <Menu.Item style={{backgroundColor: "#f3f4f5"}}>
                       {sessionCount>0 ? sessionCount:''}
                       {
                         sessionCount ? (sessionCount > 1 ? " Sessions" : " Session") : <span style={{visibility:'hidden'}}>0 Session</span>
                       }
-                    </Menu.Item>
-                    {guestCount>0 ? guestCount:''}
-                    {
-                      guestCount ? (guestCount > 1 ? " Guests" : " Guest") : <span style={{visibility:'hidden'}}>0 Guest</span>
-                    }
+                    </Menu.Item >
+                    <Menu.Item style={{backgroundColor: "#f3f4f5"}}>
+                      {guestCount>0 ? guestCount:''}
+                      {
+                        guestCount  ? (guestCount > 1 ? " Guests" : " Guest") : <span style={{visibility:'hidden'}}>0 Guest</span>
+                      }</Menu.Item>
                   </Menu>
                 </Grid.Column>
               </Grid.Row>
@@ -91,12 +78,14 @@ const DisplayDailyCalendar = props => {
           </Table.Cell>
         );
       }else{
-        daysOfWeek.push(<Table.Cell key={formattedDate}>{}</Table.Cell>)
+        daysOfWeek.push(<Table.Cell key={formattedDate} style ={{padding: "32px"}}>
+          <div style={{height:"122px",backgroundColor:"#f3f4f5"}}></div>
+        </Table.Cell>)
       }
       day = dateFns.addDays(day, 1);
     }
 
-    eachWeek.push(<Table.Row key={weekNumber}>{daysOfWeek}</Table.Row>);
+    eachWeek.push(<Table.Row key={weekNumber} >{daysOfWeek}</Table.Row>);
     daysOfWeek = [];
     weekNumber += 1;
   }
@@ -136,7 +125,8 @@ const styles = theme => ({
   },
   dateContent:{
     backgroundColor :"lightgrey !important",
-    borderRadius:"unset !important"
+    borderRadius:"unset !important",
+    border:'none !important'
   },
   days:{
     fontSize: "20px"

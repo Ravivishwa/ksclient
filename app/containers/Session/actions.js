@@ -16,7 +16,7 @@ export function getGuests() {
 export function getSession(id) {
   return {
     type: SECURE_API_CALL,
-    endpoint: `event_session/${id}`,
+    endpoint: `event_data/${id}`,
     method: 'GET',
     onStart: actions.SESSION_REQUEST,
     onError: actions.SESSION_FAILURE,
@@ -24,11 +24,25 @@ export function getSession(id) {
   }
 }
 
-export function addGuest(session,no) {
+export function openGuests(session,no) {
   return {
-    type: actions.ADD_GUEST,
+    type: actions.OPEN_GUEST,
     payload:session,
     sessionNo:no
+  }
+}
+
+export function addGuests(id,payload) {
+  console.log("identifier",id)
+  return {
+    type: SECURE_API_CALL,
+    endpoint: `session_guest/${id}`,
+    identifier:id,
+    payload:payload,
+    method: 'PUT',
+    onStart: actions.ADD_GUEST_REQUEST,
+    onError: actions.ADD_GUEST_FAILURE,
+    onSuccess: actions.ADD_GUEST_SUCCESS,
   }
 }
 

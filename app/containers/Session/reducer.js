@@ -10,7 +10,7 @@ export const initialState = fromJS({
   sessionError: null,
   open:false,
   sessionNo:null,
-  header:null
+  header:null,
 });
 
 function sessionsReducer(state = initialState, action) {
@@ -41,22 +41,26 @@ function sessionsReducer(state = initialState, action) {
         .set('sessionError', action.payload)
         .set('sessionLoading', false);
     case actions.SESSION_SUCCESS:
-      console.log(action.payload)
       return state
         .set('sessions', action.payload)
         .set('sessionError', null)
         .set('sessionLoading', false);
-    case actions.ADD_GUEST:
-      console.log(action)
+    case actions.OPEN_GUEST:
       return state
         .set('open', true)
         .set('sessionNo',action.sessionNo)
+        .set('selected', [2,5])
+    case actions.ADD_GUEST:
+      // console.log(action)
+      // return state
+      //   .set('selected', true)
+      //   .set('sessionNo',action.sessionNo)
     case actions.CLOSE_MODAL:
       return state
         .set('open',false)
-    // case actions.SET_HEADER:
-    //   return state
-    //     .set('header','sdsd')
+    case actions.SET_HEADER:
+      return state
+        .set('header','Manage Session')
     default:
       return state;
   }

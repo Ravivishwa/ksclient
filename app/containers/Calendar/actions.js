@@ -5,7 +5,7 @@ import * as actions from './constants';
 export function getEvents() {
   return {
     type: SECURE_API_CALL,
-    endpoint: 'event_session',
+    endpoint: 'event',
     method: 'GET',
     onStart: actions.EVENTS_REQUEST,
     onError: actions.EVENTS_FAILURE,
